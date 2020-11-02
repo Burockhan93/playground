@@ -1,0 +1,197 @@
+DOTween
+
+1-)Animation araci bayagi güzel timescale falan kullanmana gerek kalmio. burda önce tutorialdaki gibi belli basli animasyonlari yapacaz. sonra genisletiriz dotweenin kullanimini.
+
+using DG.Tweening burda ilk sartimiz import ediyoruz.
+scripte yazdiklarimizdan Ease class i hareketin seklini belirliyor. cok kullanisli zaten DOTween in asil olaylarindan biri.Linear yapinca düz gidiyor
+
+
+[SerializeField]
+    private DoTweenType _doTweenType = DoTweenType.MovementOneway;                           bu kismi soracam
+    
+    private enum DoTweenType
+    {
+        MovementOneway
+    }
+
+2-) kutu1------starta geldik simdi ve startta kontrol ediyoruz dotweentype imiz kendi enumda yarattgmiz Movement ise ve gidilecek yer vektör sifirdaysa transform.pos a getir (sor)
+ transform. deyince DOTween fonksiyonlari cikiyor ve ordan istedigini secebiliyorsun.
+
+ transform.DOMove(_targetloc, _time).SetEase(_moveEase); _moveease i ne secersen top öyle hareket ediyor sekme veya düz inme vs.
+
+3-)kutu----2enum icinde ikinci bir movement yarattik
+baslangic pozisyonunu bir güzel Vector3 e not ettik
+Ienumratorda -targetloc a geldikten sonra dönüp bir de ilk noktaya gitti
+bu sefer gitsin geri gelsin dedik iki nokta rasinda bu mesela platformda engellerde cok ise yarar.git gel git gel sürekli
+
+4-) kutu----3  simdi yine güzel bir özellik.
+komuta DOTween.Sequence().Append() diye baslarsan paranztez icine DOMove komutunu yazdiktan sonra tekrar bir appendle 
+baska seyler de ekleyebiliyorsun. biz de rendererdan rengini degstrcez.
+////////////////////
+[Range (1.0f,10.0f), SerializeField] ***** bu bayagi iyi birsey serialized field oyun menüsünde degistirmeyi saglio range daé ekleyebiliosn yanina.
+    private float _time = 1.0f;
+////////////////
+rengi Color classindan degstrmek mümkün direk koda bakinca anlarsin zaten
+
+5-) bu tutorialda son olarak bir de kutucugu büyütme kücültme var. kutu-4 de gitme geri gelme yaptik. bu sefer append metoduyla coroutune siz
+neyse kutu-5 e gelelim simdi bu sefer de kutunun boyutunnu artiralim bunu da scale ile yapacaz.
+
+DOTween.Sequence().Append(transform.DOMove(_targetloc, _time).SetEase(_moveEase))
+                .Append(transform.GetComponent<Renderer>().material.DOColor(_color1, _colorTime).SetEase(_moveEase))
+                .Append(transform.DOScale(_scale,_time/2).SetEase(_moveEase));
+
+onun da kodu bu.
+
+yarin diger konulara da bakariz. burda abyagi birsey ögrenmis olduk DOTwenn hakkinda. bunu platformer a iyi uyarlamak lazim.
+
+6-) simdi maneulden bakarak deneyecez ney neymis.
+	Önce yeni bir alan 4 b´nokta olstrdum basit bir dopath yaptim calisiyor. Transform componenti ustunden deneyerek basliycaz.
+DOJump  Iki okta arasi ziplama DOJump CrashBandicoottaki ziplama mesela  transform.DOJump(p1.position, 10,2,5); (en sona true eklersen kare kare hareket edio) 
+	simdi append ederek noktalar arasi ziplasin. Sequencleri ya awake ya da startta tanimla.
+	Sequence tanimladiktan sonra kapsüle sürekli hareket ettirebildik(player)
+
+
+	simdi challenge: diyelim ki cocuk obje ayrilip baska yere gidecek nasil yapariz.parenti null'e esitleme var ama gerek yok ayirarak yapmak daha mantikli.
+	Güzel bir bilgi.
+	nesneye yaptrdgmiz bu hareketleri sequencelara atmazsak hepsini bir anda yapiyor. art arda yapmasini istedgmz zaman mesela sequence kullanmmaiz gerek.
+DORotate transform.DORotate(new Vector3(180,0,0), 5,RotateMode.FastBeyond360); komutu bu eksende 180 derece döndürüyor 5 saniye sürüyor bu olay. En sondaki 
+	mod ise Fast oldugunda en kisa yoldan dönüsü tamamlarken bu modda ne girersen o kadar dönüyor.
+
+DOLookAt  bunu denedim ama sabit bir noktaya bakmiyor sürekli dönüyor
+	transform.DOLookAt(New Vector3(x,y,z),1,AxisContraint.(x veya y z veya none),New Vector3(x,y,z))
+
+DOScale i yaptik daha önce icine girdigiiz deg´ere göre obje büyüyüp kücülüo.
+
+DOPunchPosition/Rotation/Scale hepsine bakalim
+	
+		secondSequence = sphere.transform.DOJump(p4.position, 5, 3, 4).Append(sphere.transform.DOJump(p5.position,3,3,3))
+            .Append(sphere.transform.DOPunchPosition(Vector3.up,2,33,0)).Append(sphere.transform.DOPunchRotation(Vector3.up, 2, 33, 0))
+            .Append(sphere.transform.DOPunchScale(new Vector3(10,10,10), 2, 33, 1));
+		 darbe aldiktan sonra veya hareket sira bazli hareket ettikten sonra verilen tepkiler diyebilirz buaya.
+		
+
+DOSChake asahi yukari ayni 
+
+DOPath araba oyununda kullandik bayagi bir
+
+SEQUENCElerin mantigi
+	Append ede ede sirayla tweenlerimizi yaptirioz kolay. 
+.AppendInterval(2) 2 saniye bekleme veriyo
+
+.Insert(sira numarasi + tween) bu sayede 2 veya daha fazla tweeni ayni anda yapabilioruz. yani a noktasina giderken büyüme kücülme
+
+.Join (tweeni yazioz) son tweenle birlikte yürüyor.
+
+.prepend(tween) sequencin en basina geliyor ve zaman caliyor digerlerinden yani digerleri hizlanio (15.09.2020)
+
+7-) (18.09.2020)simdi baska bir kaynaktan cesitli kullanim alanlarina bakalim
+    (19.09.2020)
+	Menüde kullancaz simdi. nasil menü falan yapilir 
+
+Menuye bakinca anlasiliyor zaten neyin ne oldugu.
+
+DoAnchorpos- MainMenu.DOAnchorPos(new Vector2(800, 0), 1); menü verilen yere bir saniyede gidiyor.
+		burda dikkat edilmesi gereken biz bir süre veriyoruz menülere gitmesi icin bu süre itmeden baska komut verirsek bizim dedigimizi yapiyo sonra kaldigi yerden 
+		bir önceki komutu tamamliyo. o yüzden menüde komut verirken ,zamanlamayi dikkate almak gerek.
+
+DOJumpAnchorPos  MainMenu.DOJumpAnchorPos(new Vector2(1500, 0), 100,4,10,false); y ekseninde ziplayarak gidiyor. 
+
+DOShakeAnchorPos bu da shake ediyor birsey yapmiyo aslinda buna bir de fadeawy eklersen sallanarak yok olur.
+
+--------------------------
+
+PROBuilder
+
+1-) Bunu kullanarak basit bir map yaptik (17.09.2020) onümüzdeki günlerde bir bütün map yapmayi düsüünüorm.
+
+
+---------------------------
+AUDIO
+
+DoTween devam [20.10.2020]
+
+Simdi yurume efekti eklemeyi dusunuyorum kontrol edilen cube veya tilelar yapmistik onlara bakalm.
+1- Once kutuda collisionentere adim sesi koyduk. bu oluyor her collisionda adim sesi geliyor. önemli olan audiosource koymak bu sayede 3d ses elde ediyoruz.
+ Arka plan müzigi icin audioclip konulabilir. simdi bir audioyu nasil kontrol edebilioz ona bakalm.
+DOFade sifirla bir arasi sesi verilen sürede o seviyeye getirio
+Dopitch ise hizlandirip yavaslatio verilen sürede
+
+2- Sesle ilgili Onmousedowndaki yere de ekledik bunu ilerde isimize yarar. Onun disinda cok bir muhabbeti yok ses konusunda simdi gelelim kameraya
+	kapsulun icine basit bir play metodu yazdik.bakinca anlasilir zati.
+
+----------------------------
+public static MainCam instance;
+    private void Awake()
+    {
+        instance = this;
+    }
+bu kod bayagi enteresan direk bu classin instanceini alioruz kodun icinde bu sayede diger classlada bunu kullanabiliorz.
+----------------------------
+CAMERA
+
+1- bunun icin kapsülü takip eden bir camera scripti ekledik önce, amac kapsul karodan karoya giderken smooth bir hareket yapsin.
+
+2- DOAspect , aspectratio degistirio ve o sekilde kalio
+
+3-DOColor skybox varken etkisiz arka plan rengini degstirio. Rengi Color.red falan diye belirtmek gerek
+
+4-DOFarClipPlane, 5,1 yazdin diyelim. 5 metreden ötesi görünmüyor.
+
+5-DOOrthoSize, kameranin iki projectionu var biri orhtographic biri perspective. Orthgraphicin boyutunu degistirio.
+
+6-DOPixelrect, cam.DOPixelRect(new Rect(0,0,400,200), 1); görünüyü 400, 200 e aliyor. görüntüyü bir kanvas kabul edelim 400x200 oluyor.
+
+7- cam.DOShakePosition(0.5f, 1, 100, 5, false);
+        cam.DOShakeRotation(0.5f, 1, 100, 5, false); burda bu ikisi guzel patlama sonrasi falan sallanma efekti saglanir bunlarla.
+
+--------------------------------
+LIGHT
+
+isik olayini biraz karisik yaptik isik komponentine bir script ekledyip metodlar ekledik.
+her metod bu classtan bir instance geri donduruyor bu sayede pespese DOColor.DOShadow falan yapabildik.
+Lakin bunlari DTWeen ile yapmaya gerek yok Unityde daha fazla özgürlük vardir. Burda verilen sürede gecisler
+yumusak artisi budur bence.
+
+--------------------------------
+MATERIAL
+
+bunun icin daha önceden ve ilk olarak yapmis oldugumuz kutulari kullancam zaten orda benzer sekilde rendererdan aldgimiz materiallerle yapmistik birazini
+
+1- DOColor zaten standart
+2- DOFade biraz enteresan  	transform.GetComponent<Renderer>().material.color = _color;	kodu bu sekilde yazmamiz lazim.
+            			transform.GetComponent<Renderer>().material.DOFade(0, 0);	yani objenin rengini kendimiz atayacaz sonra onu degstrcez.
+
+3-) DOGradient  bu konu kendi basina sikinti. Gradient componentini Unity icinde kendimiz  alttaki gibi bir kodla kurup yerlestirioz. ama kendi icinde cok uzun konu
+s.et
+	gradient = new Gradient();
+
+            colorKey = new GradientColorKey[2];
+            colorKey[0].color = Color.cyan;
+            colorKey[0].time = 0.0f;
+            colorKey[1].color = Color.green;
+            colorKey[1].time = 1.0f;
+
+            alphaKey = new GradientAlphaKey[2];
+            alphaKey[0].alpha = 1.0f;
+            alphaKey[0].time = 0.0f;
+            alphaKey[1].alpha = 0.0f;
+            alphaKey[1].time = 1.0f;
+
+----------------------------------
+Böylelikle DOTweenin sonuna geldik.
+
+Transform, Material ve Camera componentlerinde etkili sekilde kullanilabilir. Light icin de denenebilir. Audio konusunda kararsizim . gerisi bence simdilik önemli degil
+spritelara baktigim zaman geri gelip onlari da kontrol edeblrm.
+21.10.2020 Dotween olayinin ilk asamasini bitiriorm.
+
+Geriye kalan yönetim kismini önümüzdeki hafta yapalim.
+---------------------------------------
+		
+
+
+
+
+
+
+
+

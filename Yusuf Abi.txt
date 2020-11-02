@@ -1,0 +1,59 @@
+https://styly.cc/tips/terrain-obj-exporter/
+
+DOTween calis .
+Unity Event calis.(Addlistener,)+++++++
+Gameprogrammingpatterns statepatternleri
+collisioncollidertrigger +++++++++
+zenjeckt ne ise yarar ++++++++baktik biraz
+**(MoveToward// Lerp// Slerp) bunlara bak  **Lookrotation 
+Sprite ne ona bakacaz bir de
+
+neden iki dusman cikiyor(hollaldu) ve thunderbolt yok etmiyor.
+araba yan cikiyor bir sonraki pathe dönmüs dogsun. dusmanlari  tüm haritaya yay. path ve wa
+
+
+
+
+***arabanin icine bos transform objeleri koy. Arabanin rotationa göre DOMove (XX) / DOLook
+
+OGRENILENLER
+COLLISION TRIGGER farki	:
+		
+		** Quaternion.FromToRotation(transform.forward, Vector3.up); 
+		Usually you use this to rotate a transform so that one of its axes eg. the y-axis - follows a target direction toDirection in world space.
+
+1-)Debug.Drawray komutu ile scne ekraninda ama game ekraninda degil cizgi cizdirebilioz.
+	bu collision noktalarini daha iyi görmemizi sagliyo.
+
+	void OnCollisionEnter(Collision collision)
+    {
+        Debug.DrawRay(collision.contacts[0].point, collision.contacts[0].normal, Color.green, 2, false);
+    }
+
+2-)Peki CollisionEnter ne?
+	Collider degil bu önce obu bilmek lazim carpisma hakkinda bilgiler veriyor bize.
+	Collider.OnCollisionEnter, Collider.OnCollisionStay and Collider.OnCollisionExit  3 metodu var bilgileri burdan aliyorsun yani carpisma olmasi gerek
+	collider kadar komplike degil 	GetContact	su iki metodu var sadece  yukardaki [] array olarak aliniyor. veya collision.contacts[i] ama bunun yerine önceki iki metodu kullan diye uyari var.	
+					GetContacts
+	peki bu aldigimiz contact bilgileri ne? mesela bir carpisma aninda ortaya birsey cikacak kivilcim mesela iki demirin carpismasinda. 
+					orda kullanilabilir cunku tam bir nokta veriyor bize.
+
+				
+EVENTSSYSTEM
+1-)oyunda ttam olarak ne zaman olacagini bildigimiz seyler icin ekstradan update metodunu yormaya gerek yok.
+	UnityEvent classi bu iste bize yardimci oluyor. mesela endScene i örnek alalim. Araba ordaki collidera girince isEndscene true oluyor. ve OnEndScene eventyini cagiriorz.
+	bunu tüm oyun boyunca update de kontrol ediyorduk artik gerek kalmadi.
+Kisaca yaptigimiz su Araba o endscenei true yapan collidera girince diyoruz ki . onEndScene.Invoke() ;
+bu peki nerde degisiklik yapiyor bunu izleyen diger diger scriptlerde. Bunu nasil izliyorlar o da kolay.
+Diger scriptlerde Awake de veya (startta) _car.onEndScene.AddListener(SetCam..); gibi bir komutla bu olayi takibe basliyoruz.
+_car objesi aslinda onEndScene eventinin icinde oldugu scripte sahip bir nesne. yani nesne üerinden .onEndScene.AddListener diyebilirz.
+Ve parantez icine yazdigimiz kisim da bu olay olunca gerceklesmisini istedigimiz fonksiyon. 
+private void SetCameraFinalPosition()
+    {
+        transform.DOMove(endCam.transform.position,1f);
+    }
+o da bu. endcam pozisyonuna 1 saniyede gitsin dedik.
+
+Benzerini kapi acilma mekanigi icin baska bir yerde yaptim oldu. Mantikli is. (https://www.youtube.com/watch?v=gx0Lt4tCDE0&ab_channel=GameDevGuide) su videoya bir ara detayli bak.
+
+DOTween  -ayri daosyada

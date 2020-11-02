@@ -1,0 +1,216 @@
+22.10.2020
+
+MINIMAP
+
+1- https://www.youtube.com/watch?v=28JTTXqMvOU&t=292s&ab_channel=Brackeys
+
+2- once ikinci bir kamera yerlestirdik playerin üstüne . tam asagi bakacak sekilde rotasyon verdik ve orthographic ayarladik.
+
+3- canvasa bir raw image ekledik. bunu ekranin sag üstüne koyduk. bu minimap olacak.
+
+4- simdi projenin icinde create>>RenderTexture diyecez. hiyerarside degil. bunun boyutunu (inspectorda) mnimap olarak kullandigimiz image le ayni seviyeye getircez.
+	depth bufferi no depth yapacaz.
+
+5-)simdi playerin üstüne koydugumu cameranin target texture kismina bu RenderTexture atacaz. bu su dmeek. Kamera artik scene e görüntü saglamio bu rendertexture a sagliyor.
+	akabnde bir de bunu raw imagedeki texture kismina yrlestrcez.artik minimap bizim haritayi gösterio ama hala oyuncuyu takip etmiyor.
+
+6- bir scriptle bu isi de halledecez. 
+	
+	Vector3 newPos = player.position;
+        newPos.y = transform.position.y;
+        transform.position = newPos;
+
+
+eger rotasyon da istiyorsak,
+
+	transform.rotation = Quaternion.Euler(90,player.eulerAngles.y,0);
+
+olduuuu
+-----------------------------------------------------------
+Explosion & Destruction Effect
+
+1-) 	Shatter effect icin: https://www.youtube.com/watch?v=EgNV0PWVaS8&ab_channel=Brackeys
+
+	bunu yapmanin iki yolu var ilki direk asst olarak almak ama bayagi pahali ve performans yiyor.
+	ikinci yolu uyguluyoruz. yöntem basit. bir assetin hem saglam hali hem de parcali hali tasarlanio blenderda.
+	bunu elemanlar kendileri yapmis zaten indirdik onu. icine texturelari attiktan sonra devam ediorz
+
+2- 	burda söyle yaptik simdi. Önce wooden crate crackedi sahneye aldik. icinde bircok parca vardi hepsini secip mesh collider ekledik.
+	ayrica herbir parcaya rigidbody de ekledik ve agirligi 0.5 yaptik. ardindan bu yeni prefabi kaydettik(eskisini silmeden). düz wooden crate e de
+	rb ekleyip 10 yaptik.
+
+3- 	sahnede saglam crate vardi onun da icine destruct scripti ekledik plan basit. buna dokununca parcalanacak bunun yolu da su.
+	bu nesneyi destroy edecez ve ayni zamanda cracked crate i cagrcaz. zaten parcali halde bulundugu icin dogar dogmaz dagilacak.
+	
+	void OnMouseDown()
+    {
+        Instantiate(destroyedCrate, transform.position, transform.rotation);
+        Destroy(gameObject);
+    }
+
+4- 	aynisini bir de viski sisesi icin yapalm. o da oldu. tikladikca parcalaniolar. aslinda bayagi guzel bir effekt. her yerde kullanilabilir. simdi patlamaya gecelim.
+
+5- 	https://www.youtube.com/watch?v=BYL6JtUdEY0&ab_channel=Brackeys tutrialin kendisi bu ama baska effekt kullancaz
+	indirdigimiz explosioneffecti aldik ve scripte gameobject olarak ekledik mosutusuyla birlikte calstgini gördük.
+	simdi ufak bir el bombasi yapip isimizi halledelim.
+
+6- 	el bombasinin icine scripti attik ve explosioneffekti de ekledik.
+	basladiktan 3 sn sonra patlama oluyo ve el bombasi gidiyor.
+
+7- *** burasi cok önemli
+
+	el bombasi cevresindeki nesnelere patlama efekti eklemeli bu sebeple
+
+	Collider [] colliders = Physics.OverlapSphere(transform.position, radius(float));
+
+	söyle bir kod yaziyoruz buna göre, bu radius cevresindeki nesnlerin colliderlari bizim Collider arrayinde toplanacak.
+	unutma array olmasi lazim
+	 ardindan foreach  ile her colliderin icinden rigidbodyleri aliyoruz. hatirla: her cratein icindeki parcanin rigidbodysi var
+	bunlara explosionforce ekliyoruz.
+	ufak not: patlama efekti icinde birden fazla loop eden efekt var hepsini ayri ayri off yap. ardindan Instantaite ederken direk prefabi degil onun bir instanceini instantiate et
+	instance = Instantiate(prefab-......)
+
+8- 	simdi el bombasini attik patlamadan sonra cratelerin parcalanmasi lazim. o destruct scriptinin icinde yani cratelerde idi.
+	o scripte GranadeDestroy diye metod ekledik. granade patlayinca ayni anda etrafindaki cratelerde parcalansin istiorz. simdiki haliyle parcalanmio.
+	
+9- 	onu da yaptik simdi baska bir problem cikiyor ortaya nesneler patlamadan etkilenmiyor.
+	onun icin iki defa bu kodlari yazacaz. ilki crateleri parcaladi ikincisi crate parcalarini ucurcak.
+	o yuzden ilk taraftaki rigidbodylerle bir isimiz kalmadi onu alttaki ikinci Phsyicsoverlapsphere kismina ekledik.
+	sikinti su, patlamadan sonra cok crate kaliyor bunlari da 3 sn sonra yok etmek gerek. Yine ayni metodun icine yine ayni taktikle prefabin bir instanceini olustrduk.
+	random sayi ekleyip 3-5 saniye arasinda yokolma süresi verdik bu sayede hepsi ayni anda yok olmuyor.
+
+10-	simdi gelelim grandenin atimina. kolay olmasi gerek.Kameranin altina bir script koyduk ve granade instancini rb addforce ile gönderdik kutularin oraya. kamera yerine baska seyler de olblr tabi
+	
+	bu tutrialin da sonuna gelmis olduk.
+
+----------------------------------------------------------------------------
+
+HEALTHBAR
+
+https://www.youtube.com/watch?v=BLfNP4Sc_iA&ab_channel=Brackeys
+
+1- 	kanvasa bir image actik ve sprite atadik icine healthbari olusturacak.health isimli bos gameobjeyi canvasin altina koyduk yine. healthbari bunun childi yaptik.
+	health in icine bir image daha koyduk bunun da adi fill. healthbarin ustunde duruyor. ve anchorda en sag alttaki secili(alta bastik.) 
+	bu sayede fill imageni daraltinca sanki can aazlio gibi oluo
+
+2-	Spritelerin icinde metadatalar da var onlarla birlikte al unity ye
+
+3- 	Health isimli gameobjeye bir de slider atadik. sliderdaki target graphici fill isimli image yaptik. bu sayede can azalip artabiliyor.
+
+4- 	Health objesine simdi script atiyoruz. yapacagmiz sey cok basit. Slider objesi acioz bir tane public adini slider koyduk
+	bunun görevi icindeki max min degerleri falan ayarlamak bir de healthi tabi.
+	buna metod yazioz iki uc tane slider.value veya maxvalue herneyse.
+
+5- 	kameranin icine bir de script ekledik mosue tusuna bastikca can gitsin diye. ayrica sliderdaki degerlere iyi bak. hepsinin bir anlami var
+
+6-	simdi bu rengi gradient komponenti ile zeginlestirelim. healthbarin icine public gradient koyup renkleri ayarladik.
+	gradient fill in icindeki imagein rengini degstrecgi icin onu da referans aldik.
+	setmaxhealth de gradient.Evaluate (1f) degerini fill (image).color a atadik. bu sayede oyunun basinda canimiz gradientin en sag rengi.
+	can azaldikca slider azaliyordu onun degerini aldik (slider.Normalizedvalue) gradientEvaluate de icine koyduk. anlamazsan tekrar bak videoya.
+
+7-      burdan sonrasini uygulama yaparken izlemek daha mantikli adam kanvasi aldi oyuncunun üstüne gelecek kadar kücülttü.
+	world wiev secenegine getirdi ve kamera dönen bir kod yazdi healthbar sürekli oyuncunun üstünde görünüyo bu sayede
+
+---------------------------------------------------------------
+NPC DIAOLogue
+
+1- 	Bunun icin önce bir hazirlik yaptik. Yeni bir alana iki kapsul NPC olarak koyduk. CharacterControllorü olan bir obje yerlestrdik ve kamera bu arkadasi takip ediyor su an.
+	NPC lerin yanina gelince menü diyalogu acilacak ve bunlaa interaktif konusmalara koyacagiz. Planimiz simdilik bu. Uzun ve sikici olablr. Isin özünde Dotween de kullanilacak
+	Animasyonlar da kullaniöcak yazilar icin bakalim.
+
+2-	https://www.youtube.com/watch?v=_nRzoTzeyxU&ab_channel=Brackeys  burdan bakarak devam ediorz.
+
+3- 	Scriptler : Bir diyalogmanager olusturduk, bir npc, bir karakter bizim bir de düz diyalog scripti.
+	Managerin icine cümleleri atayacaz ama burda eleman Queue diye farkli bir formatta public Queue<string> sentences; data type olustrdu.
+	sentences = new Queue<string>(); startta da su kodla tanimlamis olduk.
+	Diayolg scripti icinde bizim cümleleri tutacak o yuzden Monobehaviouru inherit etmesine gerek yok. classin basina Serializable yazdik bu sayede inspectordan cümle yazabilecegz.
+	icerde sentence arrayleri ve isim tutan bir sring tanimladik.
+
+4-	NPC mizin icine diolog classindan bir degisken tanimladik. Bu sayede npc lerin uzerine tiklayica inspectorda, npc nin adini ve cümlelerini girebiliyoruz.
+	[TextArea(3,10)] su kodu yine public string[]sentencesin basina girdik bu sayede inspectorda cümlleeri daha rahat yaziorz.
+
+5-	Isin güzel tarafi su; bu npc scriptine baska npc lere de koybalrm simdi. Onlara da baska cümleler yazabilirm. Diyalog classi 3 cümle ve bir isim tutuyor.
+	Bu cümleleri ama NPC ler Diyolog classini kullanarak kendi icinde tutyor. 
+
+6-	NPC deki ontriggerenterea FindObjectOfType<DialogoueManager>().StartConversation(dialogue); sunu yazdk bu sayede diyalog baslayacak
+	DilogoManagerda da StartConv metodunu yazdik. icine diyolog türünde desigken atiorz.
+
+	sentences.Clear();					bu Queue türünde yapilabilen birsey Clear metdou ardindan Enqueue metodu. detayli bak.
+								yaptgimiz olay kisaca su. Conversation baslarken dialog classindaki sentences lar arraydi,
+        foreach(string sentence in dialogue.sentences)		her sentence foreachle yakalayip Queue de siraya koyuyoruz. yani dialogue.sentences la sentences
+        {							farkli classlardan
+            sentences.Enqueue(sentence);
+        }
+
+	//string sentence = sentences.Dequeue(); 		bu kodla da siraya koydgmuz stringi geri cagirayoruz.
+
+7-	Next butonuna Manageri koyup next butonuyla siradaki conversation gelsin dedik.
+
+8-	Iki adet text variable i tanimladik managerda ve StartConversation NExtSentence metodlarinda kullandik
+
+9-	Animation ekledik diyalogboxa. kapali ve acik durumu var. sonra animatore gecip kapali durumu default sectik.
+	isOpen diye bir boolen variable belirledik. StartConversation da true oluyor anim.SetBool("isTrue", true). True olunca ekrana giris yapiyor.
+
+10-	NPC ye de OntriggerExit ekledik bu sayede oyuncu mekandan cikinca FindObjectOfType<DialogoueManager>().EndConversation(); ile conv bitiriyor.
+
+11-	text.text = diyolog.sentence yerine 			söyle bir kod yazdik. Her karakteri tek tek ortaya koyuyor. Islevsel oldugunu düsünüyorum bayagi.
+								burda sentence.ToCharArray() su önemli her harfi bir karaktere dönüstürdük. Bunu bilmesek olmazdi bu 
+	IEnumerator TypeSentence(string sentence)
+    {
+        text.text = "";
+        foreach(char character in sentence.ToCharArray())
+        {
+            yield return 0.1;
+            text.text += character;
+            
+
+        }
+    }
+
+12- 	Bu tutorial bu kadar kendimiz biraz degistirerek yapmis olduk. Yarin DOTween ekleyerek bunu gelistirrelim . Daha fazla NPC ekleyelim ve NPC lerle etkilesim de olsun
+	Konusma alanlarini güzellestirelim vesaire vesaire. 24-10-2020
+
+13-	Güzel bir eklenti yaptik. MainCam hatrliosan instance olusutruodu dogar dogmaz.Dialogue managerda bu instance i kullancaz
+	Simdi diyaloglara bir fuck you butonu ekledik. Buna basinca diyolog managerda negativ answer metodu calisiyor. bu maicam instancinin shakeI() metodunu calstirio.
+	Shake metdonnu da MainCam de DOTweenle yaptik. Ama LAteUpdate sürekli islem yaptigi icin kamera shake olmuyordu. Update metodunu iptal eden bir enabled=false komutu var
+	direk bu bu kadr yani. Daha sonra aktif olsun diye Wait coroutinei baslattik. budur olay.
+	 
+
+
+-------------------------------------------------------------------------
+
+3D Text and Animation
+
+1- 	Granada Atma yerine interaktif bir yazi ekleyelim. 3D yazi ile yapacaz. Önce bir 3D Text olstrduk bunu bir parentobjeye(TextContainer )atadik.
+
+2- 	Yazinin kalitesi cok kötü ve hep visible duvarrin arkasina gecse de? bunun cevaibni ariorz.(increase the size of the font and then scale it down in the editor, that should help)
+	herzaman gürnmesini engellemek icin shaderlarla ilgili birsey var ona sonra bakariz.
+
+3-	Parentobjeye animator ekliyoruz. ordan da altindan textin pozisyonuna bir animasyon ekliyoruz. istedgmz hersey olabilir.
+
+4-	Animasyonu ekledikten sonra animatore gidiyorz. Ordan idle durumu olstruotz ve bir trigger ekliyoruz animasyonun baslamasi icin. 
+
+5-	Sonra bu objeyi prefab yapip her harfi ayr ayri yazip ekrana yerlestiriorz. ve bunlari ana bir gameobjeye daha koyuyoruz. 
+	List<Animator> _animators;
+    public float wait = 0.5f;								bu kodu yazdiktan sonra alinda hallldu ama sonuna baska birkac sey daha ekliyoruz.
+    void Start()
+    {											farkli animasyonlar ekleyerek baska yazilar da yapmak mümkün.
+        _animators = new List<Animator>(GetComponentsInChildren<Animator>());
+        StartCoroutine(DoAnim());
+    }
+
+    IEnumerator DoAnim()
+    {
+        while (true)
+        { 
+            foreach(var animator in _animators)
+            {
+                animator.SetTrigger("DoAnim");
+                yield return new WaitForSeconds(wait);
+
+            }
+        }
+    }
+
+6- Bu da bukadr iste baska birsey yok daha. Yeni konuya gecelim.
+------------------------------------------------------------------------------
